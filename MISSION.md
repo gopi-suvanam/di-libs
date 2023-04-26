@@ -19,6 +19,19 @@ Interoperability and Flexibility: We believe in the interoperability of edge com
 Community Engagement and Empowerment: We aim to empower the developer community by actively engaging with developers, researchers, and stakeholders in the field of edge computing. We provide opportunities for community feedback, contributions, and collaborations, and strive to create a supportive and inclusive community that fosters learning, sharing, and growth.
 
 With our mission and guiding principles, we aspire to be at the forefront of edge computing in the context of AI, ML, AR, VR, Blockchain, P2P and IoT, and to empower developers and communities to build innovative and impactful applications at the edge using JavaScript libraries.
+## Why JavaScript
+JavaScript is a widely-used and versatile programming language that is well-suited for building applications across various domains, including AI, ML, AR, VR, IoT, Blockchain, and P2P. Here are some reasons why we chose JavaScript for developing libraries in these areas:
 
+Ubiquitous: JavaScript is the de facto language for web development, and it runs on virtually every web browser. This wide adoption makes JavaScript highly accessible and allows developers to build applications that can reach a large audience.
 
+Front-end and Back-end Development: JavaScript can be used for both front-end (client-side) and back-end (server-side) development. This makes it possible to develop full-stack applications that span from the user interface to the server-side logic, making it suitable for building end-to-end solutions for AI, ML, AR, VR, IoT, Blockchain, and P2P technologies.
 
+Large Developer Community: JavaScript has a massive and active developer community, which means that there is a wealth of resources, libraries, and tools available for developers to leverage when building applications in these domains. This makes it easier to find support, documentation, and examples when using JavaScript for these technologies.
+
+Interoperability: JavaScript can be easily integrated with other technologies and platforms, making it versatile for building applications that require integration with different systems, APIs, and services. This interoperability allows developers to leverage existing tools and services in their applications, saving time and effort in development.
+
+Rapid Development: JavaScript is known for its quick development cycles and prototyping capabilities, which can be advantageous in fast-paced fields like AI, ML, AR, VR, IoT, Blockchain, and P2P. JavaScript's dynamic nature, along with its large library ecosystem and easy-to-understand syntax, can help accelerate development and iteration cycles.
+
+Platform Agnostic: JavaScript can be used on different platforms, including web browsers, servers, mobile devices, and even IoT devices. This versatility makes JavaScript suitable for developing applications in various domains and for targeting different platforms, making it ideal for building cross-platform solutions.
+
+Flexibility: JavaScript is a flexible language that supports imperative, object-oriented, and functional programming paradigms. This flexibility allows developers to choose the most appropriate approach for their specific use cases and tailor their code to their requirements.
