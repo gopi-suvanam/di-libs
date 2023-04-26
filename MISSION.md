@@ -1,9 +1,9 @@
 # Mission Statement: Empowering Next-Generation Technologies with JavaScript Libraries for Edge Computing
-
+## Mission
 Our mission is to empower developers and communities to leverage the power of edge computing in emerging technologies such as artificial intelligence (AI), machine learning (ML), augmented reality (AR), virtual reality (VR), P2P computing, Blockchain, and Internet of Things (IoT) through state-of-the-art JavaScript libraries. We believe that centralized systems and power structures in the digital realm pose significant risks to individual autonomy, diversity, and innovation. We advocate for a paradigm shift towards decentralized, distributed, and community-driven technologies. We are committed to providing open-source, user-friendly, and scalable solutions that democratize access to advanced computing capabilities and enable developers to build innovative applications at the edge. 
 
 We strive to push the boundaries of what's possible with JavaScript by developing libraries that optimize computation, storage, and communication at the edge, enabling low-latency processing, efficient resource utilization, and enhanced privacy and security. We aim to foster a collaborative and inclusive community that encourages knowledge-sharing, experimentation, and co-creation among developers, researchers, and stakeholders in the field of edge computing.
-
+## Guidng Principles
 Our project is guided by the following principles:
 
 Innovation and Advancement: We believe in pushing the frontiers of technology and continuously innovating to create cutting-edge JavaScript libraries that unlock the potential of edge computing in AI, ML, AR, VR, and IoT. We strive to stay up-to-date with the latest advancements in the field and actively contribute to the evolution of edge computing technologies.
