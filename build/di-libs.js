@@ -307,15 +307,96 @@ Array.prototype.to_csv = function(header){
 
 }
 
-Array.prototype.from_csv= function(csv,start,header){
-	lines=csv.split("\n");
-	if(start!=undefined) lines.shift(start);
-	if(header) {h=lines[0];lines.shift(1);}
-	return {header:h,data:lines.map(l=>l.split(","))}
-		
+
+
+*/
+
+(()=>{
+
+
+Array.prototype.from_csv=function(csvString) {
+  const re_valid = /^\s*(?:'[^'\\]*(?:\\[\S\s][^'\\]*)*'|"[^"\\]*(?:\\[\S\s][^"\\]*)*"|[^,'"\s\\]*(?:\s+[^,'"\s\\]+)*)\s*(?:,\s*(?:'[^'\\]*(?:\\[\S\s][^'\\]*)*'|"[^"\\]*(?:\\[\S\s][^"\\]*)*"|[^,'"\s\\]*(?:\s+[^,'"\s\\]+)*)\s*)*$/;
+  const re_value = /(?!\s*$)\s*(?:'([^'\\]*(?:\\[\S\s][^'\\]*)*)'|"([^"\\]*(?:\\[\S\s][^"\\]*)*)"|([^,'"\s\\]*(?:\s+[^,'"\s\\]+)*))\s*(?:,|$)/g;
+        
+  return csvString.split("\n").map( text => {
+  	// Return NULL if input string is not well formed CSV string.
+        if (!re_valid.test(text)) return null;
+        var a = [];                     // Initialize array to receive values.
+        text.replace(re_value, // "Walk" the string using replace with callback.
+            function(m0, m1, m2, m3) {
+                // Remove backslash from \' in single quoted values.
+                if      (m1 !== undefined) a.push(m1.replace(/\\'/g, "'"));
+                // Remove backslash from \" in double quoted values.
+                else if (m2 !== undefined) a.push(m2.replace(/\\"/g, '"'));
+                else if (m3 !== undefined) a.push(m3);
+                return ''; // Return empty string.
+            });
+        // Handle special case of empty last value.
+        if (/,\s*$/.test(text)) a.push('');
+        
+        return a.map(x=>isNaN(x)?x:parseFloat(x));
+     });
 }
 
-*/// Take dataframe as dataframejs or 2D array or X and Y as arrays
+Array.prototype.to_records = function(column_names){
+	const l=column_names.length;
+	return this.map(  row=> {var r={};for(let i=0;i<l;i++) r[column_names[i]] = row[i];return r;});
+}
+
+Array.prototype.to_series = function(column_names){
+	const l=column_names.length;
+	const tr=this.transpose();
+	var series={};
+	for(let i=0;i<l;i++) series[column_names[i]] = tr[i];
+	return series;
+}
+
+
+
+
+})();﻿(()=>{
+
+
+const load_file= async function(){
+     
+	  const file_loader=document.createElement('input');
+	  file_id= (Math.random() + 1).toString(36).substring(7);
+	  file_loader.id= file_id;
+	  file_loader.type="file";
+	  file_loader.style.display='none';
+	  document.body.appendChild(file_loader);
+
+	await new Promise(resolve => setTimeout(resolve, 200));
+
+	x= await new Promise(resolve => {
+	 get_dom(file_id).addEventListener("change",event => {
+
+	 const fr = new FileReader();
+
+
+			 fr.onload=async function(event){
+			   		content=event.target.result;
+			   		get_dom(file_id).remove();
+			   		resolve(content);
+
+			 };
+
+	   fr.readAsText( get_dom(file_id).files[0]);
+
+
+
+	  });
+
+
+		 get_dom(file_id).click();
+	});
+  return(x);
+ 
+}
+
+window.load_file=load_file;
+})();
+  // Take dataframe as dataframejs or 2D array or X and Y as arrays
 // Following plots:
 // pie(X,Y, layout). 
 // bar(labels,[Ys],layout)
