@@ -2087,7 +2087,8 @@ array of random normal var
 if(random==undefined) 
 	var random ={};
 random.normal=function(mu,sigma){
-	return norm_dist.nrand()*sigma+mu;
+	let z=Math.sqrt(-2 * Math.log(1 - Math.random())) * Math.cos(2 * Math.PI * Math.random());
+	return z*sigma+mu;
 }
 
 random.choice=function(choices){
