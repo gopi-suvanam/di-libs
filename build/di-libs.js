@@ -183,7 +183,7 @@ Array.prototype.transpose = function(){
 
 
 Array.prototype.shape=function(){
-	return [this.length,this.map(x=>x.length||0).max()];
+	return [this.length,this.map(x=>x?x.length||0:0).max()];
 };
 
 
