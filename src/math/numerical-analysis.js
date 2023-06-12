@@ -12,18 +12,18 @@ Function.prototype.derivative=function(delta=0.00001,algorithm=undefined){
   }
 }
 
-Function.prototype.root=function( x0, tolerance, max_iterations,algorithm='newton-raphson',derivative) { 
+Function.prototype.root=function( x0, tolerance, max_iterations,algorithm='newton-raphson',derivative=undefined) { 
 	let f=this(x0);
 	if(Math.abs(f)<tolerance) return x0;
 	if(max_iterations==0) throw("Ran out of iterations");
-  
+
 	if(derivative==undefined) {
-	  var derivative=this.derivative(tolerance);
+	  derivative=this.derivative(tolerance);
 	}
 	var d=derivative(x0);
 	if(d==0) throw("Encountered stationary point");
 	let x=x0 -f/d; 
-	return this.root(x,tolerance, max_iterations-1,derivative,algorithm)
+	return this.root(x,tolerance, max_iterations-1,algorithm,derivative)
 	
 }
 
