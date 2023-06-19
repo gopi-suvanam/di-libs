@@ -21,18 +21,18 @@ Array.prototype.mmult=function(other){
 };
 
 Array.prototype.inverse = function(){
-	shape=this.shape();
+	var shape=this.shape();
 	if(shape[0]!=shape[1]) throw("Matrix has to be square");
 	
 	  const n = shape[0];
 	  var identity = [];
 	  var inverse = [];
 	  let det = 1;
-	  idx=range(0,n,1);
+	  var idx=range(0,n,1);
 	
 	  // Create identity matrix
-	  identity=idx.map(i=>idx.map(j=>i==j?1:0));
-	  copy=idx.map(i=>idx.map(j=>this[i][j]));
+	  var identity=idx.map(i=>idx.map(j=>i==j?1:0));
+	  var copy=idx.map(i=>idx.map(j=>this[i][j]));
 	  
 	  
 	
