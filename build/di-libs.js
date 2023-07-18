@@ -389,6 +389,21 @@ Array.prototype.plot = function(type,dom,params){
 	Plotly.newPlot(new_div, data,params['layout']);
 	
   }
+  if(type=='pie' ){
+   
+  	var name=params['name'] || String(params['names']);
+  	var shape=this.shape();
+
+  	if(shape[1]==2 && shape[0]>2) return this.transpose().plot(type,dom,params);
+  
+  
+  	if(shape[1]>1 && shape[0]>1)
+		var data=[{"values":this[1],lables:this[0],type:type,name:name}];
+	else
+		var data=[{"values":this,type:type,name:name}];
+  
+	test=Plotly.newPlot(new_div, data,params['layout']);
+  }
   if(type=='multi-line' || type=='multi-bar'){
   
   	var data=[];
