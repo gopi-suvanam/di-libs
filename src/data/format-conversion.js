@@ -49,11 +49,14 @@ Array.prototype.from_csv=function(csvString) {
 }
 
 Array.prototype.to_records = function(column_names){
+	if(column_names == undefined){const shape=this.shape(); column_names=range(0,shape[1]);};
 	const l=column_names.length;
 	return this.map(  row=> {var r={};for(let i=0;i<l;i++) r[column_names[i]] = row[i];return r;});
 }
 
 Array.prototype.to_series = function(column_names){
+	
+	if(column_names == undefined){const shape=this.shape(); column_names=range(0,shape[1]);};
 	const l=column_names.length;
 	const tr=this.transpose();
 	var series={};

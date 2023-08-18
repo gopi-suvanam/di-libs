@@ -1,3 +1,4 @@
+(()=>{
 norm_dist={}
 
 norm_dist.stdcdf=function(x){   //HASTINGS.  MAX ERROR = .000001
@@ -35,3 +36,27 @@ norm_dist.nrand = function() {
 	return Math.sqrt(-2 * Math.log(1 - Math.random())) * Math.cos(2 * Math.PI * Math.random()) 
 };
 
+
+norm_dist.multivariate = function(x, mean, covariance){
+  const d = mean.length;
+  const det = covariance.determinant();
+  const invCovariance = covariance.inverse();
+
+  const diff = [];
+  for (let i = 0; i < d; i++) {
+    diff.push(x[i] - mean[i]);
+  }
+
+  let exponent = 0;
+  for (let i = 0; i < d; i++) {
+    for (let j = 0; j < d; j++) {
+      exponent -= 0.5 * (diff[i] * invCovariance[i][j] * diff[j]);
+    }
+  }
+
+  const normalization = 1 / (Math.pow(2 * Math.PI, d / 2) * Math.sqrt(Math.abs(det)));
+
+  return normalization * Math.exp(exponent);
+}
+
+})();

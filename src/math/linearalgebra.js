@@ -86,11 +86,11 @@ Array.prototype.inverse = function(){
 }
 
 Array.prototype.determinant=function(){
-	shape=this.shape();
+	const shape=this.shape();
 	if(shape[0]!=shape[1]) throw("Matrix has to be square");
-	n=shape[0];
+	const n=shape[0];
 	if(n==1)
-		this[0][0];
+		return this[0][0];
 	let det = 0;
 	  for (let i = 0; i < n; i++) {
 	    var subMatrix = this.transpose()
