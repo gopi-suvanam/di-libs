@@ -62,9 +62,10 @@ ml.HMM = function(nbstates, obsdim) {
     new HMMMatrices.HMMObservationProbabilityMatrix(bDef);*/
   var g = [];
   var pi = [];
+  var covars = numeric.identity(obsdim);
+  var means = numeric.add(numeric.mul(covars[0], 0), 3+(i-0.5*nbstates)/nbstates); // to have different vectors  
   for (var i=0; i<nbstates; i++) {
-    var covars = numeric.identity(obsdim);
-    var means = numeric.add(numeric.mul(covars[0], 0), 3+(i-0.5*nbstates)/nbstates); // to have different vectors
+
     var gaussian = new GaussianLaw(means, covars); // FILL IN MORE ARGUMENTS
     g.push(gaussian);
     pi.push(1/nbstates);

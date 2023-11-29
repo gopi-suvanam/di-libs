@@ -6519,20 +6519,30 @@ Function.prototype.integral = function( a,b,n,algorithm="simpsons") {
 
 activation = {};
 activation.indentity = (x=>x);
+activation.indentity.inverse = ()=>(x=>x);
+
 activation.softstep = (x=> //1/(1+e^(-x))
 			  x>0?
 			  1/(1+Math.exp(-x)):
 			  Math.exp(x)/(1+Math.exp(x))
 			  );
+activation.softstep.inverse = ()=>(p=>-Math.log((1-p)/p));
+ 
+
 activation.softplus = (x=> x>0?   //log(1+e^(x))
 	   		Math.log(1+Math.exp(-x))+x:
 	   		Math.log(1+Math.exp(x))
 					  
 			);
+activation.softplus.inverse =()=>(y=>Math.log(1-Math.exp(-y)) + y )
+
+
+
 const k=1;
 activation.softlog = (x=>
 		Math.log(activation.softplus(x)+k)-Math.log(activation.softplus(-x)+k)
 		);
+		
 
 
 
@@ -6748,9 +6758,10 @@ ml.HMM = function(nbstates, obsdim) {
     new HMMMatrices.HMMObservationProbabilityMatrix(bDef);*/
   var g = [];
   var pi = [];
+  var covars = numeric.identity(obsdim);
+  var means = numeric.add(numeric.mul(covars[0], 0), 3+(i-0.5*nbstates)/nbstates); // to have different vectors  
   for (var i=0; i<nbstates; i++) {
-    var covars = numeric.identity(obsdim);
-    var means = numeric.add(numeric.mul(covars[0], 0), 3+(i-0.5*nbstates)/nbstates); // to have different vectors
+
     var gaussian = new GaussianLaw(means, covars); // FILL IN MORE ARGUMENTS
     g.push(gaussian);
     pi.push(1/nbstates);
@@ -7095,7 +7106,81 @@ ml.HMM.prototype._getLogProb = function(c) {
 
 
 
-})();/* functions to upload files to p2p.. network and download.
+})();﻿(()=>{
+if(typeof ml === 'undefined') ml={};
+
+if(typeof numeric === 'undefined') console.log("Warning: ml.GLM will not work without numeric.js library");
+
+
+
+function multivariateLinearRegression(xValues, yValues) {
+  const n = xValues.length;
+  const m = xValues[0].length;
+  console.log(xValues.shape());
+  // Add a column of ones for the intercept term
+  
+  const xMeans = xValues.reduce((acc, row) => row.map((val, i) => (acc[i] || 0) + val), Array(m).fill(0)).map(val => val / n);
+  const yMean = yValues.reduce((acc, val) => acc + val, 0) / n;
+
+  // Subtract means from the data (centering)
+  const centeredX = xValues.map(row => row.map((val, i) => val - xMeans[i]));
+  const centeredY = yValues.map(val => val - yMean);
+
+  // Add a column of ones for the intercept term
+  
+  // Compute the transpose of the augmented X matrix
+  const transposedX = centeredX.transpose();
+
+  // Compute X'X and X'y
+
+  const xTx = transposedX.mmult(centeredX);
+  const xTy = transposedX.map((row, i) => row.reduce((acc, val) => acc + val * yValues[i], 0));
+
+  // Calculate the coefficients (beta)
+  const coefficients = numeric.solve(xTx, xTy);
+  const constant = yMean-numeric.dot(coefficients,xMeans);
+  
+  return [constant,...coefficients];
+}
+
+
+
+ml.NonLinearLS=function(activation){
+	this.activation = activation;
+	this.coeffs=[];
+	this.vars=[];
+	this.invsere_activation = this.activation.inverse();
+	
+	this.fit =function(X,Y,vars){
+		Y_ = Y.map(this.invsere_activation);
+		
+		if(vars==undefined){
+			this.vars=Object.keys(X[0]);
+		}
+		else this.vars=vars;
+		
+		X_=X.map(row => this.vars.map(v=>row[v]));
+		
+		this.coeffs = multivariateLinearRegression(X_,Y_);
+	}
+	
+		
+		
+	this.predict=function(X){
+		const coeffs=this.coeffs;
+		const activation=this.activation;
+		const vars=this.vars;
+		const predict_one = function(x){			 
+			let x_=[1,...vars.map(v =>x[v] )];
+			return activation(numeric.dot(x_,coeffs));
+		}
+		
+	  	return X.map(predict_one);
+	}
+
+}
+
+})()/* functions to upload files to p2p.. network and download.
 It is a layer on top of Webtorrents/ipfs-js etc */
 /** tools for discovering peers.. including interacting with stun servers **/
 /** Files for computing map-reduce jobs on p2p framework **/
