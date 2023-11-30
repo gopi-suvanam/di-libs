@@ -1,8 +1,8 @@
 ﻿(()=>{
 
 activation = {};
-activation.indentity = (x=>x);
-activation.indentity.inverse = ()=>(x=>x);
+activation.linear = (x=>x);
+activation.linear.inverse = ()=>(x=>x);
 
 activation.softstep = (x=> //1/(1+e^(-x))
 			  x>0?
