@@ -7240,9 +7240,9 @@ di.ml.NonLinearEnsemble=function(activations,feature_selection_prob,sample_selec
 				const model_samples= index.filter(_=>Math.random()<this.sample_selection_prob);
 				const model_X= model_samples.map(i=>X[i]);
 				const model_Y= model_samples.map(i=>Y[i]);
-				var model=new ml.NonLinearLS(model_activation);
+				var model=new di.ml.NonLinearLS(model_activation);
 				model.fit(model_X,model_Y,model_vars);
-			  let err=error.rms(model_Y,model.predict(model_X));
+			  let err=di.error.rms(model_Y,model.predict(model_X));
 			  if(err>0)
 				this.models.push(model);
 			}catch(e){
