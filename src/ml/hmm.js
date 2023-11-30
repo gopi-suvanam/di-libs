@@ -172,7 +172,7 @@ HMM.prototype.fitObservations = function(o, maxIters, verbose) {
 };
 
 
-prototype.getStateProbabilityPath = function(o) {
+HMM.prototype.getStateProbabilityPath = function(o) {
   this._verifyObservations(o);
 
   var T = o.length;
