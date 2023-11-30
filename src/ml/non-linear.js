@@ -1,5 +1,6 @@
 ﻿(()=>{
-if(typeof ml === 'undefined') ml={};
+if(typeof di=== 'undefined') di={};
+if(typeof di.ml === 'undefined') di.ml={};
 
 if(typeof numeric === 'undefined') console.log("Warning: ml.GLM will not work without numeric.js library");
 
@@ -36,7 +37,7 @@ function multivariateLinearRegression(xValues, yValues) {
 }
 
 
-ml.NonLinearLS=function(activation){
+di.ml.NonLinearLS=function(activation){
 	this.activation = activation;
 	this.coeffs=[];
 	this.vars=[];
@@ -72,7 +73,7 @@ ml.NonLinearLS=function(activation){
 }
 
 
-ml.NonLinearEnsemble=function(activations,feature_selection_prob,sample_selection_prob,num_estimators,meta_activation){
+di.ml.NonLinearEnsemble=function(activations,feature_selection_prob,sample_selection_prob,num_estimators,meta_activation){
 	this.activations=activations;
 	this.feature_selection_prob=feature_selection_prob;
 	this.sample_selection_prob=sample_selection_prob;

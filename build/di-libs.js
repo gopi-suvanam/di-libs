@@ -6517,7 +6517,9 @@ Function.prototype.integral = function( a,b,n,algorithm="simpsons") {
 
 })();﻿(()=>{
 
-activation = {};
+if(typeof di=== 'undefined') di={};
+
+let activation = {};
 activation.linear = (x=>x);
 activation.linear.inverse = ()=>(x=>x);
 
@@ -6544,24 +6546,28 @@ activation.softlog = (x=>
 		);
 		
 
-
+di.activation=activation;
 
 
 })();﻿(()=>{
 
-error={};
+if(typeof di=== 'undefined') di={};
+
+let error={};
 
 error.rms = (Y_,Y) =>
 	Math.sqrt(Y_.subtract(Y).map(x=>x**2).mean());
 
 
+di.error=error;
 })();﻿(()=>{
 
-if(typeof ml === 'undefined') ml={};
+if(typeof di=== 'undefined') di={};
+if(typeof di.ml === 'undefined') di.ml={};
 
 if(typeof numeric === 'undefined') console.log("Warning: ml.GLM will not work without numeric.js library");
 
-ml.GLM=function(activation,error){
+di.ml.GLM=function(activation,error){
 	this.activation = activation;
 	this.error=error;
 	this.coeffs=[];
@@ -6626,7 +6632,7 @@ ml.GLM=function(activation,error){
 
 }
 
-ml.GLMEnsemble=function(activations,error,feature_selection_prob,sample_selection_prob,num_estimators,meta_activation){
+di.ml.GLMEnsemble=function(activations,error,feature_selection_prob,sample_selection_prob,num_estimators,meta_activation){
 	this.activations=activations;
 	this.error=error;
 	this.feature_selection_prob=feature_selection_prob;
@@ -6696,7 +6702,8 @@ ml.GLMEnsemble=function(activations,error,feature_selection_prob,sample_selectio
 
 })();﻿(()=>{
 
-if(typeof ml === 'undefined') ml={};
+if(typeof di=== 'undefined') di={};
+if(typeof di.ml === 'undefined') di.ml={};
 
 if(typeof numeric === 'undefined') console.log("Warning: ml.GLM will not work without numeric.js library");
 
@@ -6749,7 +6756,7 @@ GaussianLaw.prototype.simulate = function() {
 
 
 
-ml.HMM = function(nbstates, obsdim) {
+let HMM = function(nbstates, obsdim) {
   //var a = this.stateTransitionMatrix =
   //  new HMMMatrices.HMMStateTransitionMatrix(aDef);
   var transmat = numeric.add(numeric.identity(nbstates), 0.1);
@@ -6779,14 +6786,14 @@ ml.HMM = function(nbstates, obsdim) {
   this.dimensionOfObservations = obsdim;
 };
 
-ml.HMM.prototype.numberOfStates = 0;
-ml.HMM.prototype.dimensionOfObservations = 0;
-ml.HMM.prototype.initialStateDistributionMatrix = null;
-ml.HMM.prototype.stateTransitionMatrix = null;
-ml.HMM.prototype.observationProbabilityCPDs = null;
+HMM.prototype.numberOfStates = 0;
+HMM.prototype.dimensionOfObservations = 0;
+HMM.prototype.initialStateDistributionMatrix = null;
+HMM.prototype.stateTransitionMatrix = null;
+HMM.prototype.observationProbabilityCPDs = null;
 
 
-ml.HMM.prototype.simulateStates = function(pathLength, withObservations) {
+HMM.prototype.simulateStates = function(pathLength, withObservations) {
 
   var states = [];
   var observations = [];
@@ -6830,7 +6837,7 @@ ml.HMM.prototype.simulateStates = function(pathLength, withObservations) {
 // Train model to fit the observations.
 // This method will modify the model matrices.
 // This is the solution 3 in chapter 4.3, implemented with code in chapter 7.
-ml.HMM.prototype.fitObservations = function(o, maxIters, verbose) {
+HMM.prototype.fitObservations = function(o, maxIters, verbose) {
   this._verifyObservations(o);
 
   var oldLogProb = -Infinity;
@@ -6867,7 +6874,7 @@ ml.HMM.prototype.fitObservations = function(o, maxIters, verbose) {
 };
 
 
-ml.HMM.prototype.getStateProbabilityPath = function(o) {
+prototype.getStateProbabilityPath = function(o) {
   this._verifyObservations(o);
 
   var T = o.length;
@@ -6896,7 +6903,7 @@ ml.HMM.prototype.getStateProbabilityPath = function(o) {
 
 
 // This is the 2nd part of chapter 7: The α-pass
-ml.HMM.prototype._alphaPass = function(o) {
+HMM.prototype._alphaPass = function(o) {
   var n = this.numberOfStates;
   var a = this.stateTransitionMatrix;
   var b = this.observationProbabilityCPDs;
@@ -6944,7 +6951,7 @@ ml.HMM.prototype._alphaPass = function(o) {
 };
 
 // Part 3 of chapter 7: The β-pass
-ml.HMM.prototype._betaPass = function(c, o) {
+HMM.prototype._betaPass = function(c, o) {
   var n = this.numberOfStates;
   var T = o.length;
 
@@ -6974,7 +6981,7 @@ ml.HMM.prototype._betaPass = function(c, o) {
 };
 
 // Part 4 of chapter 7: Compute γt(i, j) and γt(i)
-ml.HMM.prototype._gammaPass = function(alpha, beta, c, o) {
+HMM.prototype._gammaPass = function(alpha, beta, c, o) {
   var n = this.numberOfStates;
   //var T = c.length;
   var T = o.length;
@@ -7022,7 +7029,7 @@ ml.HMM.prototype._gammaPass = function(alpha, beta, c, o) {
   };
 };
 
-ml.HMM.prototype._updateModel = function(gamma, digamma, o) {
+HMM.prototype._updateModel = function(gamma, digamma, o) {
   var n = this.numberOfStates;
   //var m = this.numberOfObservationSymbols;
   var T = o.length;
@@ -7072,7 +7079,7 @@ ml.HMM.prototype._updateModel = function(gamma, digamma, o) {
 };
 
 
-ml.HMM.prototype._verifyObservations = function(o) {
+HMM.prototype._verifyObservations = function(o) {
   var T = o.length;
   //var m = this.numberOfObservationSymbols;
   var obsdim = this.dimensionOfObservations;
@@ -7090,7 +7097,7 @@ ml.HMM.prototype._verifyObservations = function(o) {
 };
 
 // Part 6 of chapter 7: Compute log[P (O | λ)]
-ml.HMM.prototype._getLogProb = function(c) {
+HMM.prototype._getLogProb = function(c) {
   var T = c.length;
 
   var logProb = 0;
@@ -7102,12 +7109,13 @@ ml.HMM.prototype._getLogProb = function(c) {
 };
 
 
-
+di.ml.HMM=HMM;
 
 
 
 })();﻿(()=>{
-if(typeof ml === 'undefined') ml={};
+if(typeof di=== 'undefined') di={};
+if(typeof di.ml === 'undefined') di.ml={};
 
 if(typeof numeric === 'undefined') console.log("Warning: ml.GLM will not work without numeric.js library");
 
@@ -7144,7 +7152,7 @@ function multivariateLinearRegression(xValues, yValues) {
 }
 
 
-ml.NonLinearLS=function(activation){
+di.ml.NonLinearLS=function(activation){
 	this.activation = activation;
 	this.coeffs=[];
 	this.vars=[];
@@ -7180,7 +7188,7 @@ ml.NonLinearLS=function(activation){
 }
 
 
-ml.NonLinearEnsemble=function(activations,feature_selection_prob,sample_selection_prob,num_estimators,meta_activation){
+di.ml.NonLinearEnsemble=function(activations,feature_selection_prob,sample_selection_prob,num_estimators,meta_activation){
 	this.activations=activations;
 	this.feature_selection_prob=feature_selection_prob;
 	this.sample_selection_prob=sample_selection_prob;
@@ -7248,7 +7256,9 @@ ml.NonLinearEnsemble=function(activations,feature_selection_prob,sample_selectio
 
 })()﻿(()=>{
 
-performance = {};
+if(typeof di=== 'undefined') di={};
+
+let performance = {};
 performance.r2 = (observed, predicted) => {
   const meanObserved = observed.reduce((acc, val) => acc + val, 0) / observed.length;
   const ssTotal = observed.reduce((acc, val) => acc + (val - meanObserved) ** 2, 0);
@@ -7349,7 +7359,7 @@ performance.accuracy=function(predictedProbabilities, actualClasses, threshold =
   };
 }
 
-
+di.performance=performance;
 
 })();/* functions to upload files to p2p.. network and download.
 It is a layer on top of Webtorrents/ipfs-js etc */

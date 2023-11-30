@@ -1,10 +1,11 @@
 ﻿(()=>{
 
-if(typeof ml === 'undefined') ml={};
+if(typeof di=== 'undefined') di={};
+if(typeof di.ml === 'undefined') di.ml={};
 
 if(typeof numeric === 'undefined') console.log("Warning: ml.GLM will not work without numeric.js library");
 
-ml.GLM=function(activation,error){
+di.ml.GLM=function(activation,error){
 	this.activation = activation;
 	this.error=error;
 	this.coeffs=[];
@@ -69,7 +70,7 @@ ml.GLM=function(activation,error){
 
 }
 
-ml.GLMEnsemble=function(activations,error,feature_selection_prob,sample_selection_prob,num_estimators,meta_activation){
+di.ml.GLMEnsemble=function(activations,error,feature_selection_prob,sample_selection_prob,num_estimators,meta_activation){
 	this.activations=activations;
 	this.error=error;
 	this.feature_selection_prob=feature_selection_prob;

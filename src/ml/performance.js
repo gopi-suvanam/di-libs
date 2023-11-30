@@ -1,6 +1,8 @@
 ﻿(()=>{
 
-performance = {};
+if(typeof di=== 'undefined') di={};
+
+let performance = {};
 performance.r2 = (observed, predicted) => {
   const meanObserved = observed.reduce((acc, val) => acc + val, 0) / observed.length;
   const ssTotal = observed.reduce((acc, val) => acc + (val - meanObserved) ** 2, 0);
@@ -101,6 +103,6 @@ performance.accuracy=function(predictedProbabilities, actualClasses, threshold =
   };
 }
 
-
+di.performance=performance;
 
 })();

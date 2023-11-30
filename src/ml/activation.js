@@ -1,6 +1,8 @@
 ﻿(()=>{
 
-activation = {};
+if(typeof di=== 'undefined') di={};
+
+let activation = {};
 activation.linear = (x=>x);
 activation.linear.inverse = ()=>(x=>x);
 
@@ -27,7 +29,7 @@ activation.softlog = (x=>
 		);
 		
 
-
+di.activation=activation;
 
 
 })();
