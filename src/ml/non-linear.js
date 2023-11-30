@@ -116,7 +116,7 @@ di.ml.NonLinearEnsemble=function(activations,feature_selection_prob,sample_selec
 		const meta_Y= meta_model_samples.map(i=>Y[i]);
 		
 			
-		this.meta_model = new ml.NonLinearLS(meta_activation);
+		this.meta_model = new di.ml.NonLinearLS(meta_activation);
 		this.meta_model.fit(meta_X,meta_Y);
 		
 		
