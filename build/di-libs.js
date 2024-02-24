@@ -373,7 +373,7 @@ Array.prototype.to_series = function(column_names){
 
 Array.prototype.plot = function(type,dom,params){
   if(params == undefined) params ={};
-  if(dom==undefined) var dom = curr_cell();
+  if(dom==undefined && typeof(scrib)!='undefined') var dom = scrib.currCell();
   if(type==undefined) var type='line';
   if(typeof(dom)=='string') dom = document.getElementById(dom);
   
