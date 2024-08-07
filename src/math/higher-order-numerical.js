@@ -26,7 +26,7 @@ Function.prototype.root = function(x0, tolerance = 1e-5, max_iterations = 100, a
 	
 	  if (derivative == undefined) {
 	    this.derivative.tolerance = tolerance;
-	    derivative = this.derivative(tolerance);
+	    derivative = this.derivative;
 	  }
 	
 	  while (Math.abs(f) >= tolerance && iterations < max_iterations) {
