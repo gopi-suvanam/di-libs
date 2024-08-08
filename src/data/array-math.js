@@ -22,6 +22,32 @@ Array.prototype.min =function(){
 	
 };
 
+Array.prototype.quantile = function(q) {
+    if (!Array.isArray(this)) {
+        throw new Error('Input should be an array');
+    }
+    if (this.length < 2) {
+        throw new Error('Array must contain at least two elements');
+    }
+    if (q <= 0 || q >= 1) {
+        throw new Error('Quantile should be between 0 and 1, exclusive');
+    }
+
+    const sortedArr = this.slice().sort((a, b) => a - b);
+    const n = sortedArr.length;
+    const pos = q * (n + 1) - 1; // `n + 1` makes it exclusive, -1 to adjust zero-indexing
+    const base = Math.floor(pos);
+    const rest = pos - base;
+
+    if (base < 0) {
+        return sortedArr[0];
+    } else if (base >= n - 1) {
+        return sortedArr[n - 1];
+    } else {
+        return sortedArr[base] + rest * (sortedArr[base + 1] - sortedArr[base]);
+    }
+};
+	
 Array.prototype.scale =function(type){
 	if(type=='min-max'){
 		min=this.min();
