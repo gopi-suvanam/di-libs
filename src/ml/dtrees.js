@@ -1,25 +1,17 @@
 /**
  * Calculates the chi-squared statistic.
  * 
- * @param {Array<number>} observed - Observed frequencies.
- * @param {Array<number>} expected - Expected frequencies.
+ * @param {Float32Array} observed - Observed frequencies.
+ * @param {Float32Array} expected - Expected frequencies.
  * @returns {number} Chi-squared statistic value.
  */
 function chiSquared(observed, expected) {
-  // Initialize chi-squared statistic to 0.
   let chiSq = 0;
-
-  // Iterate over observed frequencies.
-  for (let i in observed) {
-    // For each category, calculate the squared difference between observed and expected frequencies,
-    // divided by the expected frequency. Add to the total chi-squared statistic.
-    chiSq += Math.pow(observed[i] - (expected[i] || 0), 2) / (expected[i] || 0);
+  for (let i = 0; i < observed.length; i++) {
+    chiSq += Math.pow(observed[i] - expected[i], 2) / expected[i];
   }
-
-  // Return the calculated chi-squared statistic.
   return chiSq;
 }
-
 
 /**
  * Calculates observed and expected frequencies for a given attribute and target.
@@ -30,86 +22,63 @@ function chiSquared(observed, expected) {
  * @returns {Object} Object containing observed frequencies, expected frequencies, and raw frequencies.
  */
 function getFrequencies(data, attribute, target) {
+  const attrValues = new Set(data.map(row => row[attribute]));
+  const targetValues = new Set(data.map(row => row[target]));
+
   // Initialize frequency counters.
-  let frequencies = {};
-  let targetTotals = {};
+  const frequencies = new Map();
+  const targetTotals = new Map();
 
-  // Iterate over data to count frequencies.
+  // Count frequencies.
   data.forEach(row => {
-    let attrValue = row[attribute];
-    let targetValue = row[target];
+    const attrValue = row[attribute];
+    const targetValue = row[target];
 
-    // Initialize frequency object for attribute value if needed.
-    if (!frequencies[attrValue]) {
-      frequencies[attrValue] = {};
+    if (!frequencies.has(attrValue)) {
+      frequencies.set(attrValue, new Map());
     }
-
-    // Initialize frequency counter for attribute-target pair if needed.
-    if (!frequencies[attrValue][targetValue]) {
-      frequencies[attrValue][targetValue] = 0;
+    if (!frequencies.get(attrValue).has(targetValue)) {
+      frequencies.get(attrValue).set(targetValue, 0);
     }
+    frequencies.get(attrValue).set(targetValue, frequencies.get(attrValue).get(targetValue) + 1);
 
-    // Increment frequency counter.
-    frequencies[attrValue][targetValue]++;
-
-    // Initialize target total counter if needed.
-    if (!targetTotals[targetValue]) {
-      targetTotals[targetValue] = 0;
+    if (!targetTotals.has(targetValue)) {
+      targetTotals.set(targetValue, 0);
     }
-
-    // Increment target total counter.
-    targetTotals[targetValue]++;
+    targetTotals.set(targetValue, targetTotals.get(targetValue) + 1);
   });
 
-  // Initialize observed and expected frequency objects.
-  let observed = {};
-  let expected = {};
+  // Initialize observed and expected frequencies as Float32Array.
+  const observed = new Float32Array(attrValues.size * targetValues.size);
+  const expected = new Float32Array(attrValues.size * targetValues.size);
 
-  // Calculate observed and expected frequencies.
-  for (let attrValue in frequencies) {
-    // Calculate total frequency for attribute value.
-    let total = Object.values(frequencies[attrValue]).reduce((a, b) => a + b, 0);
+  let index = 0;
+  frequencies.forEach((targetMap, attrValue) => {
+    const total = Array.from(targetMap.values()).reduce((a, b) => a + b, 0);
+    targetValues.forEach(targetValue => {
+      const observedFreq = targetMap.get(targetValue) || 0;
+      const expectedFreq = (total * targetTotals.get(targetValue)) / data.length;
+      observed[index] = observedFreq;
+      expected[index] = expectedFreq;
+      index++;
+    });
+  });
 
-    for (let targetValue in targetTotals) {
-      // Calculate observed frequency.
-      observed[attrValue + ":" + targetValue] = frequencies[attrValue][targetValue] || 0;
-
-      // Calculate expected frequency using total and target totals.
-      expected[attrValue + ":" + targetValue] = (total * targetTotals[targetValue]) / data.length;
-
-      // Normalize frequency for attribute-target pair.
-      if (targetValue in frequencies[attrValue]) {
-        frequencies[attrValue][targetValue] = frequencies[attrValue][targetValue] / total;
-      }
-    }
-  }
-
-  // Return observed frequencies, expected frequencies, and raw frequencies.
   return { observed, expected, frequencies };
 }
 
 /**
  * Calculates Bhattacharyya similarity coefficient between two probability distributions.
  * 
- * @param {Object<number>} dict1 - First probability distribution.
- * @param {Object<number>} dict2 - Second probability distribution.
+ * @param {Float32Array} prob1 - First probability distribution.
+ * @param {Float32Array} prob2 - Second probability distribution.
  * @returns {number} Bhattacharyya similarity coefficient (0 ≤ BC ≤ 1).
  */
-function bhattacharyyaSimilarity(dict1, dict2) {
-  // Initialize Bhattacharyya coefficient.
+function bhattacharyyaSimilarity(prob1, prob2) {
   let bc = 0;
-
-  // Calculate sum of probabilities for each distribution.
-  const sum1 = Object.values(dict1).reduce((a, b) => a + b, 0);
-  const sum2 = Object.values(dict2).reduce((a, b) => a + b, 0);
-
-  // Iterate over keys in dict1.
-  for (let key in dict1) {
-    // Calculate Bhattacharyya coefficient for each corresponding probability pair.
-    bc += Math.sqrt((dict1[key] * (dict2[key] || 0)) / (sum1 * sum2));
+  for (let i = 0; i < prob1.length; i++) {
+    bc += Math.sqrt(prob1[i] * prob2[i]);
   }
-
-  // Return Bhattacharyya similarity coefficient.
   return bc;
 }
 
@@ -122,20 +91,14 @@ function bhattacharyyaSimilarity(dict1, dict2) {
  * @returns {Object} Object containing best attribute, merged frequencies, and chi-squared statistic.
  */
 function findBestSplit(data, attributes, target) {
-  // Initialize variables.
   let bestAttribute = null;
   let bestChiSq = 0;
   let bestFrequencies = {};
 
-  // Iterate over attributes.
   attributes.forEach(attribute => {
-    // Calculate observed and expected frequencies for attribute.
-    let { observed, expected, frequencies } = getFrequencies(data, attribute, target);
+    const { observed, expected, frequencies } = getFrequencies(data, attribute, target);
+    const chiSq = chiSquared(observed, expected);
 
-    // Calculate chi-squared statistic.
-    let chiSq = chiSquared(observed, expected);
-
-    // Update best attribute if chi-squared statistic improves.
     if (chiSq > bestChiSq) {
       bestChiSq = chiSq;
       bestFrequencies = mergeCategories(frequencies);
@@ -143,116 +106,81 @@ function findBestSplit(data, attributes, target) {
     }
   });
 
-  // Store best attribute in frequencies object.
   bestFrequencies['bestAttribute'] = bestAttribute;
-
-  // Return best frequencies and attribute.
   return bestFrequencies;
 }
 
 /**
  * Combines two frequency dictionaries by summing corresponding values.
  * 
- * @param {Object<number>} targetFrequencies1 - First frequency dictionary.
- * @param {Object<number>} targetFrequencies2 - Second frequency dictionary.
- * @returns {Object<number>} Combined frequency dictionary.
+ * @param {Map} targetFrequencies1 - First frequency dictionary.
+ * @param {Map} targetFrequencies2 - Second frequency dictionary.
+ * @returns {Map} Combined frequency dictionary.
  */
 function combineFrequencies(targetFrequencies1, targetFrequencies2) {
-  // Get all unique keys from both dictionaries.
-  const allKeys = [...new Set([...Object.keys(targetFrequencies1), ...Object.keys(targetFrequencies2)])];
-
-  // Initialize the result dictionary.
-  const result = {};
-
-  // Iterate through each key and sum the values from both dictionaries.
-  allKeys.forEach(key => {
-    // Use || 0 to default to 0 if key is missing in either dictionary.
-    result[key] = (targetFrequencies1[key] || 0) + (targetFrequencies2[key] || 0);
+  const result = new Map(targetFrequencies1);
+  targetFrequencies2.forEach((value, key) => {
+    result.set(key, (result.get(key) || 0) + value);
   });
-
-  // Return the combined frequency dictionary.
   return result;
 }
-
-
-
-
 
 /**
  * Merges similar categories in a frequency dictionary based on Bhattacharyya similarity.
  * 
- * @param {Object<Object<number>>} frequencies - Frequency dictionary with categories as keys.
+ * @param {Map} frequencies - Frequency dictionary with categories as keys.
  * @returns {Object} Object containing merged frequency dictionary, category-to-group mapping, and group-to-categories mapping.
  */
 function mergeCategories(frequencies) {
-  // Initialize variables.
-  let categories = Object.keys(frequencies);
-  let merged = {};
-  let categoryToGroup = {};
-  let groupToCategories = {};
-  let groupFrequencies = {};
+  const categories = Array.from(frequencies.keys());
+  const categoryToGroup = new Map();
+  const groupToCategories = new Map();
+  const groupFrequencies = new Map();
 
-  // Iterate over categories.
-  for (let i = 0; i < categories.length; i++) {
-    // Skip already merged categories.
-    if (categoryToGroup[categories[i]]) continue;
+  for (let i = 0; i < categories.length; i++){
+	category=categories[i];
+    if (categoryToGroup.has(category)) continue;
 
-    // Initialize category-to-group and group-to-categories mappings.
-    categoryToGroup[categories[i]] = categories[i];
-    groupToCategories[categories[i]] = [categories[i]];
+    categoryToGroup.set(category, category);
+    groupToCategories.set(category, [category]);
 
-    // Compare with remaining categories.
     for (let j = i + 1; j < categories.length; j++) {
-      // Skip already merged categories.
-      if (categoryToGroup[categories[j]]) continue;
+      const otherCategory = categories[j];
+      if (categoryToGroup.has(otherCategory)) continue;
 
-      // Calculate Bhattacharyya similarity.
-      let similarity = bhattacharyyaSimilarity(frequencies[categories[i]], frequencies[categories[j]]);
+      const similarity = bhattacharyyaSimilarity(
+        new Float32Array(Array.from(frequencies.get(category).values())),
+        new Float32Array(Array.from(frequencies.get(otherCategory).values()))
+      );
 
-      // Merge categories if similarity exceeds threshold (adjust as needed).
       if (similarity > 0.9) {
-        categoryToGroup[categories[j]] = categories[i];
-        groupToCategories[categories[i]].push(categories[j]);
+        categoryToGroup.set(otherCategory, category);
+        groupToCategories.get(category).push(otherCategory);
       }
     }
-  }
-    // Return merged frequency dictionary, category-to-group mapping, and group-to-categories mapping.
-  return { groupFrequencies, categoryToGroup, groupToCategories };
+  };
 
+  return { groupFrequencies, categoryToGroup, groupToCategories };
 }
 
-
-  
 /**
  * Calculates the frequency of each target value in a dataset.
  * 
  * @param {Array<Object>} data - Dataset.
  * @param {string} target - Target variable.
- * @returns {Object<number>} Object with target values as keys and frequencies as values.
+ * @returns {Float32Array} Float32Array with target value frequencies.
  */
 function getTargetFrequencies(data, target) {
-  // Initialize object to store target value frequencies.
-  let targetCounts = {};
-
-  // Total number of data points.
+  const targetCounts = new Map();
   const totalCount = data.length;
 
-  // Iterate over data points.
   data.forEach(row => {
-    // Initialize count for target value if needed.
-    if (!targetCounts[row[target]]) {
-      targetCounts[row[target]] = 0;
-    }
-
-    // Increment count and normalize by total count.
-    targetCounts[row[target]] += 1 / totalCount;
+    const targetValue = row[target];
+    targetCounts.set(targetValue, (targetCounts.get(targetValue) || 0) + 1 / totalCount);
   });
 
-  // Return object with target value frequencies.
-  return targetCounts;
+  return new Float32Array(Array.from(targetCounts.values()));
 }
-
-
 
 /**
  * Recursively builds a decision tree.
@@ -265,42 +193,27 @@ function getTargetFrequencies(data, target) {
  * @returns {Object|null} Decision tree node or null.
  */
 function buildTree(data, attributes, target, maxDepth = 3, minLeaf = 1) {
-  // Base cases: no attributes, no data, or max depth reached.
   if (attributes.length === 0 || data.length === 0 || maxDepth == 0) {
     return null;
   }
 
-  // Find best attribute to split data.
-  let {
-    bestAttribute,
-    categoryToGroup,
-    groupFrequencies,
-    groupToCategories
-  } = findBestSplit(data, attributes, target);
+  const { bestAttribute, categoryToGroup, groupFrequencies } = findBestSplit(data, attributes, target);
 
-  // No suitable attribute found.
   if (!bestAttribute) {
     return null;
   }
 
-  // Initialize node.
-  let node = {
+  const node = {
     attribute: bestAttribute,
     children: {},
-    isLeaf: true
+    isLeaf: true,
+    value: getTargetFrequencies(data, target),
+    categoryToGroup,
   };
 
-  // Store target value frequencies.
-  node['value'] = getTargetFrequencies(data, target);
+  groupFrequencies.forEach((group, key) => {
+    const subset = data.filter(row => categoryToGroup.get(row[bestAttribute]) === key);
 
-  // Store category grouping information.
-  node['categoryToGroup'] = categoryToGroup;
-
-  // Recursively build child nodes.
-  Object.keys(groupFrequencies).forEach(group => {
-    const subset = data.filter(row => categoryToGroup[row[bestAttribute]] == group);
-
-    // Only recurse if subset has enough instances and depth allows.
     if (subset.length > minLeaf && maxDepth > 0) {
       const child = buildTree(
         subset,
@@ -309,51 +222,34 @@ function buildTree(data, attributes, target, maxDepth = 3, minLeaf = 1) {
         maxDepth - 1
       );
 
-      // Add child node if it exists.
       if (child) {
-        node.children[bestAttribute + ":" + group] = child;
+        node.children[bestAttribute + ":" + key] = child;
       }
     }
   });
 
-  // Mark node as leaf if no children.
-  node['isLeaf'] = Object.keys(node.children).length === 0;
-
-  console.log("Returning one node");
-
+  node.isLeaf = Object.keys(node.children).length === 0;
   return node;
 }
 
-
-
-
 /**
-* Predicts the target value for a single instance using the decision tree.
+ * Predicts the target value for a single instance using the decision tree.
  * 
  * @param {Object} tree - Decision tree.
  * @param {Object} instance - Instance to predict.
- * @returns {Object|null} Predicted target value frequencies or null.
+ * @returns {Float32Array|null} Predicted target value frequencies or null.
  */
 function predict(tree, instance) {
-  // Leaf node: return target value frequencies.
   if (tree.isLeaf) {
     return tree.value;
   }
 
-  // Get attribute value from instance.
-  let attrValue = instance[tree.attribute];
+  const attrValue = instance[tree.attribute];
+  const childNode = tree.children[tree.attribute + ":" + tree.categoryToGroup.get(attrValue)];
 
-  // Get child node based on attribute value and category grouping.
-  let childNode = tree.children[tree.attribute + ":" + tree['categoryToGroup'][attrValue]];
-
-  // No child node found: return null or default value.
   if (!childNode) {
-    // Consider returning the most common target value in the current node instead of null.
-    // return getMostCommonTargetValue(tree.value);
     return null;
   }
 
-  // Recursively predict using child node.
   return predict(childNode, instance);
 }
-
